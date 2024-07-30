@@ -1,6 +1,8 @@
 <h1 align="center">
   <img src=".images/logo.png" width="96"/><br/>
-  <a href="https://hits.sh/github.com/silentsoft/schrodingers-inbox/"><img alt="Hits" src="https://hits.sh/github.com/silentsoft/schrodingers-inbox.svg"/></a><br/>
+  <a href="https://hits.sh/github.com/silentsoft/schrodingers-inbox/"><img alt="Hits" src="https://hits.sh/github.com/silentsoft/schrodingers-inbox.svg"/></a>
+  <a href="https://status.schrodingersinbox.net"><img alt="Uptime Robot status" src="https://img.shields.io/uptimerobot/status/m797349781-066a35b821dbe3ff781f0b17"></a>
+  <a href="https://status.schrodingersinbox.net"><img alt="Uptime Robot ratio (30 days)" src="https://img.shields.io/uptimerobot/ratio/m797349781-066a35b821dbe3ff781f0b17"></a><br/>
   Schrodinger's Inbox
 </h1>
 <h4 align="center">
