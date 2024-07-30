@@ -21,10 +21,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
@@ -41,12 +38,14 @@ public class EmailController {
     private int expirationMinutes;
 
     private Map<String, SseEmitter> emitters;
+    private Map<String, List<Map<String, Object>>> emailBuffer;
     private Map<String, ScheduledFuture<?>> scheduledTasks;
     private ScheduledExecutorService scheduler;
 
     @PostConstruct
     public void init() {
         emitters = new ConcurrentHashMap<>();
+        emailBuffer = new ConcurrentHashMap<>();
         scheduledTasks = new ConcurrentHashMap<>();
         scheduler = Executors.newScheduledThreadPool(1);
     }
@@ -88,6 +87,18 @@ public class EmailController {
             emitter.completeWithError(e);
         }
 
+        List<Map<String, Object>> bufferedEmails = emailBuffer.getOrDefault(email, new ArrayList<>());
+        for (Map<String, Object> bufferedEmail : bufferedEmails) {
+            try {
+                emitter.send(SseEmitter.event().name("email:received").data(bufferedEmail));
+            } catch (IOException e) {
+                emitter.completeWithError(e);
+                emitters.remove(email);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+        }
+        emailBuffer.remove(email);
+
         scheduleEmailExpiration(email);
 
         return ResponseEntity.ok(emitter);
@@ -95,12 +106,18 @@ public class EmailController {
 
     public void sendReceivedEmailToClient(String email, String data) {
         try {
-            SseEmitter emitter = emitters.get(email);
-            if (emitter != null) {
-                try {
-                    emitter.send(SseEmitter.event().name("email:received").data(parseMimeMessage(data)));
-                } catch (IOException e) {
-                    emitter.completeWithError(e);
+            if (scheduledTasks.containsKey(email)) {
+                SseEmitter emitter = emitters.get(email);
+                Map<String, Object> parsedEmail = parseMimeMessage(data);
+                if (emitter != null) {
+                    try {
+                        emitter.send(SseEmitter.event().name("email:received").data(parsedEmail));
+                    } catch (IOException e) {
+                        emailBuffer.computeIfAbsent(email, k -> new ArrayList<>()).add(parsedEmail);
+                        emitter.completeWithError(e);
+                    }
+                } else {
+                    emailBuffer.computeIfAbsent(email, k -> new ArrayList<>()).add(parsedEmail);
                 }
             }
         } catch (Exception e) {
@@ -156,13 +173,17 @@ public class EmailController {
     }
 
     private void scheduleEmailExpiration(String email) {
-        ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> {
-            notifyEmailExpiration(email);
-            emitters.remove(email);
-            scheduledTasks.remove(email);
-        }, expirationMinutes, TimeUnit.MINUTES);
+        if (!scheduledTasks.containsKey(email)) {
+            ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> {
+                scheduledTasks.remove(email);
 
-        scheduledTasks.put(email, scheduledTask);
+                notifyEmailExpiration(email);
+                emitters.remove(email);
+                emailBuffer.remove(email);
+            }, expirationMinutes, TimeUnit.MINUTES);
+
+            scheduledTasks.put(email, scheduledTask);
+        }
     }
 
     private void notifyEmailExpiration(String email) {
