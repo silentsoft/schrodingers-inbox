@@ -18,6 +18,7 @@ import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -135,20 +136,20 @@ public class EmailController {
             email.put("body", body.toString());
         }
 
-        email.put("from", mimeMessage.getFrom()[0].toString());
+        email.put("from", MimeUtility.decodeText(mimeMessage.getFrom()[0].toString()));
 
         Address[] toAddresses = mimeMessage.getRecipients(MimeMessage.RecipientType.TO);
         String to = Arrays.stream(toAddresses)
                 .map(Address::toString)
                 .collect(Collectors.joining(", "));
-        email.put("to", to);
+        email.put("to", MimeUtility.decodeText(to));
 
         Address[] ccAddresses = mimeMessage.getRecipients(MimeMessage.RecipientType.CC);
         if (ccAddresses != null) {
             String cc = Arrays.stream(ccAddresses)
                     .map(Address::toString)
                     .collect(Collectors.joining(", "));
-            email.put("cc", cc);
+            email.put("cc", MimeUtility.decodeText(cc));
         }
 
         return email;
