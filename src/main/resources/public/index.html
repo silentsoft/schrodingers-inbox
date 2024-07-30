@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Schrodinger's Inbox</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Your emails exist and don't exist until you observe them. A quantum leap in temporary email services." />
+    <meta property="og:title" content="Schrodinger's Inbox">
+    <meta property="og:description" content="Your emails exist and don't exist until you observe them. A quantum leap in temporary email services.">
+    <meta property="og:url" content="https://schrodingersinbox.net/">
+    <meta property="og:image" content="https://schrodingersinbox.net/og-img-1200x630.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <link rel="canonical" href="https://schrodingersinbox.net/">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono&display=swap" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png">
+    <link rel="manifest" href="%PUBLIC_URL%/site.webmanifest">
+    <link rel="mask-icon" href="%PUBLIC_URL%/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <% if (process.env.REACT_APP_GOOGLE_ANALYTICS_TRACKING_ID) { %>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=<%= process.env.REACT_APP_GOOGLE_ANALYTICS_TRACKING_ID %>"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', '<%= process.env.REACT_APP_GOOGLE_ANALYTICS_TRACKING_ID %>');
+    </script>
+    <% } %>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>
